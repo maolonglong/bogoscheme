@@ -1,0 +1,14 @@
+(test
+ (name lexer)
+ (modules lexer)
+ (libraries ounit2 bogoscheme))
+
+(test
+ (name parser)
+ (modules parser)
+ (libraries ounit2 bogoscheme))
+
+(test
+ (name eval)
+ (modules eval)
+ (libraries ounit2 bogoscheme))

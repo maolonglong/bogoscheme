@@ -9,5 +9,6 @@
 
 (executable
  (name main)
+ (modes byte exe)
  (modules main)
  (libraries bogoscheme))
