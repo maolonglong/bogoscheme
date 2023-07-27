@@ -6,7 +6,8 @@ type value =
   | Val_unit
   | Val_bool of bool
   | Val_int of int
-  | Val_prim of (value list -> value) (* primitive functions *)
+  | Val_string of string
+  | Val_prim of (env -> value list -> value) (* primitive functions *)
   | Val_lambda of env * id list * Ast.expr list
 
 and env =
@@ -22,6 +23,7 @@ let string_of_value v =
   | Val_bool true -> "#t"
   | Val_bool false -> "#f"
   | Val_int i -> string_of_int i
+  | Val_string s -> Printf.sprintf "%S" s
   | Val_prim _ -> "[primitive function]"
   | Val_lambda _ -> "[lambda expression]"
 ;;

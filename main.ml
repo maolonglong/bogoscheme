@@ -64,6 +64,7 @@ let () =
   | [| _; "-h" |] | [| _; "--help" |] | [| _; "help" |] -> usage ()
   | [| _; filename |] ->
     let infile = open_in filename in
+    Sys.chdir (Filename.dirname filename);
     (try run_program infile with
      | e ->
        (match e with

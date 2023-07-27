@@ -5,7 +5,7 @@
 
 (library
  (name bogoscheme)
- (modules ast sexpr parser lexer env eval primitives))
+ (modules ast sexpr parser lexer env eval primitives embed))
 
 (executable
  (name main)

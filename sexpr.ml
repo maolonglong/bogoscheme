@@ -2,6 +2,7 @@ type atom =
   | Atom_unit
   | Atom_bool of bool
   | Atom_int of int
+  | Atom_string of string
   | Atom_id of string
 
 type expr =
@@ -14,6 +15,7 @@ let string_of_atom a =
   | Atom_unit -> "#u"
   | Atom_bool b -> if b then "#t" else "#f"
   | Atom_int i -> string_of_int i
+  | Atom_string s -> Printf.sprintf "%S" s
   | Atom_id s -> s
 ;;
 

@@ -3,6 +3,7 @@
 %token          TOK_UNIT
 %token <bool>   TOK_BOOL
 %token <int>    TOK_INT
+%token <string> TOK_STRING
 %token <string> TOK_ID
 %token          TOK_EOF
 
@@ -26,10 +27,11 @@ sexpr:
   ;
 
 atom:
-  |      TOK_UNIT { Sexpr.Atom_unit }
-  | b  = TOK_BOOL { Sexpr.Atom_bool b }
-  | i  = TOK_INT  { Sexpr.Atom_int i }
-  | id = TOK_ID   { Sexpr.Atom_id id }
+  |      TOK_UNIT   { Sexpr.Atom_unit }
+  | b  = TOK_BOOL   { Sexpr.Atom_bool b }
+  | i  = TOK_INT    { Sexpr.Atom_int i }
+  | s  = TOK_STRING { Sexpr.Atom_string s }
+  | id = TOK_ID     { Sexpr.Atom_id id }
   ;
 
 slist:

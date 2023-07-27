@@ -6,7 +6,8 @@ type value =
   | Val_unit
   | Val_bool of bool
   | Val_int of int
-  | Val_prim of (value list -> value) (* primitive functions *)
+  | Val_string of string
+  | Val_prim of (env -> value list -> value) (* primitive functions *)
   | Val_lambda of env * id list * Ast.expr list
 
 (** Type of environments. *)

@@ -4,6 +4,7 @@ type expr =
   | Expr_unit
   | Expr_bool of bool
   | Expr_int of int
+  | Expr_string of string
   | Expr_id of id
   | Expr_define of id * expr
   | Expr_if of expr * expr * expr
@@ -16,6 +17,7 @@ let rec ast_of_sexpr sx =
     | S.Atom_unit -> Expr_unit
     | S.Atom_bool b -> Expr_bool b
     | S.Atom_int i -> Expr_int i
+    | S.Atom_string s -> Expr_string s
     | S.Atom_id id -> Expr_id id
   in
   let ast_of_define = function
@@ -76,6 +78,7 @@ let string_of_ast ast =
     | Expr_unit -> sprintf "%sUNIT" (spaces indent)
     | Expr_bool b -> sprintf "%sBOOL[ %b ]" (spaces indent) b
     | Expr_int i -> sprintf "%sINT[ %d ]" (spaces indent) i
+    | Expr_string s -> sprintf "%sSTRING[ %S ]" (spaces indent) s
     | Expr_id id -> sprintf "%sID[ %s ]" (spaces indent) id
     | Expr_define (id, e) ->
       sprintf "%sDEFINE[%s\n%s ]" (spaces indent) id (iter e (indent + 2))

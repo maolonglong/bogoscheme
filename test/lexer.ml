@@ -9,6 +9,7 @@ let string_of_token = function
   | TOK_UNIT -> "UNIT"
   | TOK_BOOL b -> if b then "#t" else "#f"
   | TOK_INT i -> string_of_int i
+  | TOK_STRING s -> Printf.sprintf "%S" s
   | TOK_ID id -> id
   | TOK_EOF -> "EOF"
 ;;
@@ -33,6 +34,7 @@ let make_lexer_test name expected_output input =
 let tests =
   [ make_lexer_test "int" [ TOK_INT 123 ] "123"
   ; make_lexer_test "neg_int" [ TOK_INT (-123) ] "-123"
+  ; make_lexer_test "string" [ TOK_STRING "abc" ] "\"abc\""
   ; make_lexer_test "unit" [ TOK_UNIT ] "#u"
   ; make_lexer_test "bool_true" [ TOK_BOOL true ] "#t"
   ; make_lexer_test "bool_false" [ TOK_BOOL false ] "#f"

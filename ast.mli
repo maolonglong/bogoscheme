@@ -6,6 +6,7 @@ type expr =
   | Expr_unit
   | Expr_bool of bool
   | Expr_int of int
+  | Expr_string of string
   | Expr_id of id
   | Expr_define of id * expr
   | Expr_if of expr * expr * expr

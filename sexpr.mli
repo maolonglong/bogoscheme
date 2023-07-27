@@ -3,6 +3,7 @@ type atom =
   | Atom_unit
   | Atom_bool of bool
   | Atom_int of int
+  | Atom_string of string
   | Atom_id of string
 
 (** Type of all S-expressions. *)

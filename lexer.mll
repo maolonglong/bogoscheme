@@ -7,7 +7,7 @@ let digit      = ['0' - '9']
 let integer    = '-'? digit+
 let id_chars   = ['a' - 'z' '+' '-' '*' '/' '=' '<' '>' '!']
 let comment    = ';' [^ '\n']*
-let identifier = id_chars (id_chars | digit)*
+let identifier = id_chars (id_chars | digit)* '?'?
 
 rule lex = parse
   | comment    { lex lexbuf }
@@ -19,5 +19,15 @@ rule lex = parse
   | "#f"       { TOK_BOOL false }
   | integer    { TOK_INT (int_of_string (Lexing.lexeme lexbuf)) }
   | identifier { TOK_ID (Lexing.lexeme lexbuf) }
+  | '"'        { lex_string (Buffer.create 16) lexbuf }
   | eof        { TOK_EOF }
   | _          { failwith ("Unexpected char: " ^ Lexing.lexeme lexbuf) }
+
+and lex_string buf = parse
+  | '"'          { TOK_STRING (Buffer.contents buf) }
+  | '\\' '\\'    { Buffer.add_char buf '\\'; lex_string buf lexbuf }
+  | '\\' '\n'    { Buffer.add_char buf '\n'; lex_string buf lexbuf }
+  | '\\' '"'     { Buffer.add_char buf '"'; lex_string buf lexbuf }
+  | [^ '"' '\\'] { Buffer.add_string buf (Lexing.lexeme lexbuf); lex_string buf lexbuf }
+  | eof          { failwith "String is not terminated" }
+  | _            { failwith ("Illegal string character: " ^ Lexing.lexeme lexbuf) }

@@ -27,8 +27,14 @@ examples:
 	dune exec ./main.exe -- ./examples/test_multi.bs
 	dune exec ./main.exe -- ./examples/test_primitives.bs
 	dune exec ./main.exe -- ./examples/test_scoping.bs
+	dune exec ./main.exe -- ./examples/test_my_lib.bs
 .PHONY: examples
 
 clean:
 	@dune clean
 .PHONY: clean
+
+embed:
+	ocaml-embed-file -output embed ./primitives.bs
+	dune fmt >/dev/null 2>&1 || true
+.PHONY: embed

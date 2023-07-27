@@ -7,6 +7,7 @@ let rec eval ast env =
   | Ast.Expr_unit -> Val_unit
   | Ast.Expr_bool b -> Val_bool b
   | Ast.Expr_int i -> Val_int i
+  | Ast.Expr_string s -> Val_string s
   | Ast.Expr_id id -> lookup env id
   | Ast.Expr_define (id, e) ->
     let value = eval e env in
@@ -24,7 +25,7 @@ let rec eval ast env =
     (* Evaluate the function argument (the first argument). *)
     let f = eval e env in
     (match f with
-     | Val_prim prim_func -> prim_func operands
+     | Val_prim prim_func -> prim_func env operands
      | Val_lambda (env', ids, exprs) ->
        if List.length ids <> List.length operands
        then raise (Type_error "Applied to wrong operands");

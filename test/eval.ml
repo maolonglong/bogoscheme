@@ -48,6 +48,20 @@ let tests =
       \        1\n\
       \        (* n (factorial (- n 1))))))\n\n\
        (factorial number)"
+  ; make_eval_test "and_0" (Val_bool true) "(and)"
+  ; make_eval_test "and_1" (Val_int 1) "(and 1)"
+  ; make_eval_test "and_2_#t" (Val_int 1) "(and #t 1)"
+  ; make_eval_test "and_2_#f" (Val_bool false) "(and #f 1)"
+  ; make_eval_test "and_2_t_t" (Val_bool true) "(and #t #t)"
+  ; make_eval_test "or_0" (Val_bool false) "(or)"
+  ; make_eval_test "or_1" (Val_int 1) "(or 1)"
+  ; make_eval_test "or_2_#t" (Val_bool true) "(or #t 1)"
+  ; make_eval_test "or_2_#f" (Val_int 1) "(or #f 1)"
+  ; make_eval_test "or_2_f_t" (Val_bool true) "(or #f #t)"
+  ; make_eval_test "negative1" (Val_bool false) "(negative? 1)"
+  ; make_eval_test "negative2" (Val_bool true) "(negative? -1)"
+  ; make_eval_test "min" (Val_int 1) "(min 1 2)"
+  ; make_eval_test "max" (Val_int 2) "(max 1 2)"
   ]
 ;;
 
