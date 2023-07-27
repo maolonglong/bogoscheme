@@ -26,6 +26,8 @@ let rec eval ast env =
     (match f with
      | Val_prim prim_func -> prim_func operands
      | Val_lambda (env', ids, exprs) ->
+       if List.length ids <> List.length operands
+       then raise (Type_error "Applied to wrong operands");
        let parent_env = make (Some env') in
        add_all parent_env ids operands;
        let results = List.map (fun x -> eval x parent_env) exprs in

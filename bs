@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ "$(command -v rlwrap)" ]; then
+    rlwrap dune exec ./main.exe -- "$@"
+else
+    dune exec ./main.exe -- "$@"
+fi

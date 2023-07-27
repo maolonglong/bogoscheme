@@ -5,8 +5,8 @@ A subset of [Scheme](https://www.gnu.org/software/mit-scheme/)
 ## Examples
 
 ```bash
-# interpreter
-$ dune exec ./main.exe -- ./tests/fibonacci.bs
+# Interprets a file
+$ ./bs ./tests/fibonacci.bs
 0
 1
 1
@@ -18,7 +18,8 @@ $ dune exec ./main.exe -- ./tests/fibonacci.bs
 12586269025
 
 # REPL
-$ dune exec ./main.exe
+$ ./bs
+BogoScheme REPL (Press Ctrl-D to exit)
 > (define x 10)
 #u
 > (print x)
