@@ -129,5 +129,5 @@ let load env =
     ]
   in
   List.iter (fun (op, name) -> Env.add env name (Val_prim op)) ops;
-  load_from_string env Embed.primitives_dot_bs
+  load_from_string env Embed.primitives_dot_scm
 ;;

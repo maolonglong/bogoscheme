@@ -6,7 +6,7 @@ A subset of [Scheme](https://www.gnu.org/software/mit-scheme/)
 
 ```bash
 # Interprets a file
-$ ./bs ./examples/fibonacci.bs
+$ ./bs ./examples/fibonacci.scm
 0
 1
 1

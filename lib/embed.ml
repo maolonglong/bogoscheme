@@ -1,4 +1,4 @@
-let primitives_dot_bs =
+let primitives_dot_scm =
   "(define not\n\
   \  (lambda (b)\n\
   \    (if b\n\

@@ -19,15 +19,15 @@ test:
 .PHONY: test
 
 examples:
-	dune exec ./main.exe -- ./examples/factorial.bs
-	dune exec ./main.exe -- ./examples/fibonacci.bs
-	dune exec ./main.exe -- ./examples/test_factorial.bs
-	dune exec ./main.exe -- ./examples/test_intdef.bs
-	dune exec ./main.exe -- ./examples/test_lambda.bs
-	dune exec ./main.exe -- ./examples/test_multi.bs
-	dune exec ./main.exe -- ./examples/test_primitives.bs
-	dune exec ./main.exe -- ./examples/test_scoping.bs
-	dune exec ./main.exe -- ./examples/test_my_lib.bs
+	./bs ./examples/factorial.scm
+	./bs ./examples/fibonacci.scm
+	./bs ./examples/test_factorial.scm
+	./bs ./examples/test_intdef.scm
+	./bs ./examples/test_lambda.scm
+	./bs ./examples/test_multi.scm
+	./bs ./examples/test_primitives.scm
+	./bs ./examples/test_scoping.scm
+	./bs ./examples/test_my_lib.scm
 .PHONY: examples
 
 clean:
@@ -35,6 +35,6 @@ clean:
 .PHONY: clean
 
 embed:
-	ocaml-embed-file -output embed ./primitives.bs
+	ocaml-embed-file -output embed -output-dir lib ./primitives.scm
 	dune fmt >/dev/null 2>&1 || true
 .PHONY: embed

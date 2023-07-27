@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [ "$(command -v rlwrap)" ]; then
-    rlwrap dune exec ./main.exe -- "$@"
+    rlwrap dune exec ./bin/main.exe -- "$@"
 else
-    dune exec ./main.exe -- "$@"
+    dune exec ./bin/main.exe -- "$@"
 fi
