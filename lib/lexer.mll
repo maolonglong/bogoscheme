@@ -10,18 +10,20 @@ let comment    = ';' [^ '\n']*
 let identifier = id_chars (id_chars | digit)* '?'?
 
 rule lex = parse
-  | comment    { lex lexbuf }
-  | whitespace { lex lexbuf }
-  | '('        { TOK_LPAREN }
-  | ')'        { TOK_RPAREN }
-  | "#u"       { TOK_UNIT }
-  | "#t"       { TOK_BOOL true }
-  | "#f"       { TOK_BOOL false }
-  | integer    { TOK_INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | identifier { TOK_ID (Lexing.lexeme lexbuf) }
-  | '"'        { lex_string (Buffer.create 16) lexbuf }
-  | eof        { TOK_EOF }
-  | _          { failwith ("Unexpected char: " ^ Lexing.lexeme lexbuf) }
+  | comment          { lex lexbuf }
+  | whitespace       { lex lexbuf }
+  | '('              { TOK_LPAREN }
+  | ')'              { TOK_RPAREN }
+  | '.'              { TOK_DOT }
+  | "'"              { TOK_QUOTE }
+  | "#u"             { TOK_UNIT }
+  | "#t"             { TOK_BOOL true }
+  | "#f"             { TOK_BOOL false }
+  | integer          { TOK_INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | identifier | '.' { TOK_ID (Lexing.lexeme lexbuf) }
+  | '"'              { lex_string (Buffer.create 16) lexbuf }
+  | eof              { TOK_EOF }
+  | _                { failwith ("Unexpected char: " ^ Lexing.lexeme lexbuf) }
 
 and lex_string buf = parse
   | '"'          { TOK_STRING (Buffer.contents buf) }

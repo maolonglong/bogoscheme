@@ -28,6 +28,7 @@ examples:
 	./bs ./examples/test_primitives.scm
 	./bs ./examples/test_scoping.scm
 	./bs ./examples/test_my_lib.scm
+	./bs ./examples/test_cond.scm
 .PHONY: examples
 
 clean:

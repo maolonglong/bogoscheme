@@ -30,11 +30,11 @@ let tests =
       "; foo bar \n (define x 10)"
   ; make_parser_test
       "lambda"
-      (Some (Expr_lambda ([ "x" ], [ Expr_id "x" ])))
+      (Some (Expr_lambda ([ "x" ], None, [ Expr_id "x" ])))
       "; identity \n (lambda (x) x)"
   ; make_parser_test
       "define_lambda"
-      (Some (Expr_define ("id", Expr_lambda ([ "x" ], [ Expr_id "x" ]))))
+      (Some (Expr_define ("id", Expr_lambda ([ "x" ], None, [ Expr_id "x" ]))))
       "(define id (lambda (x) x))"
   ; make_parser_test
       "apply_id"
@@ -42,7 +42,7 @@ let tests =
       "(+ 1 2)"
   ; make_parser_test
       "apply_lambda"
-      (Some (Expr_apply (Expr_lambda ([ "x" ], [ Expr_id "x" ]), [ Expr_int 1 ])))
+      (Some (Expr_apply (Expr_lambda ([ "x" ], None, [ Expr_id "x" ]), [ Expr_int 1 ])))
       "((lambda (x) x) 1)"
   ; make_parser_test
       "if"
@@ -55,6 +55,7 @@ let tests =
             ( "factorial"
             , Expr_lambda
                 ( [ "n" ]
+                , None
                 , [ Expr_if
                       ( Expr_apply (Expr_id "=", [ Expr_id "n"; Expr_int 0 ])
                       , Expr_int 1
@@ -68,6 +69,18 @@ let tests =
                             ] ) )
                   ] ) )))
       "(define factorial (lambda (n) (if (= n 0) 1 (* n (factorial (- n 1))))))"
+  ; make_parser_test
+      "quote_list"
+      (Some
+         (Expr_quoted
+            (Sexpr.Expr_list
+               [ Sexpr.Expr_atom (Sexpr.Atom_int 1); Sexpr.Expr_atom (Sexpr.Atom_int 2) ])))
+      "'(1 2)"
+  ; make_parser_test "quote_empty_list" (Some (Expr_quoted (Sexpr.Expr_list []))) "'()"
+  ; make_parser_test
+      "quote_id"
+      (Some (Expr_quoted (Sexpr.Expr_atom (Sexpr.Atom_id "if"))))
+      "'if"
   ]
 ;;
 

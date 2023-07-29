@@ -8,6 +8,7 @@ type atom =
 type expr =
   | Expr_atom of atom
   | Expr_list of expr list
+  | Expr_dotted_list of expr list * expr
 
 (* Convert an atom into a string. *)
 let string_of_atom a =
@@ -22,7 +23,7 @@ let string_of_atom a =
 (* Return a string of n spaces. *)
 let spaces n = String.make n ' '
 
-let string_of_expr sx =
+let rec string_of_expr sx =
   let rec iter_string_of_expr sx indent =
     match sx with
     | Expr_atom a ->
@@ -30,6 +31,14 @@ let string_of_expr sx =
       Printf.sprintf "ATOM[%s]" s
     | Expr_list slist ->
       "\n" ^ spaces indent ^ "LIST[ " ^ iter_string_of_expr_list slist (indent + 2) ^ " ]"
+    | Expr_dotted_list (slist, sexp) ->
+      "\n"
+      ^ spaces indent
+      ^ "DOTTED_LIST[ "
+      ^ iter_string_of_expr_list slist (indent + 2)
+      ^ " . "
+      ^ string_of_expr sexp
+      ^ " ]"
   and iter_string_of_expr_list slist indent =
     match slist with
     | [] -> ""
@@ -47,6 +56,14 @@ let string_of_expr2 sx =
       Printf.sprintf "%s" s
     | Expr_list slist ->
       "\n" ^ spaces indent ^ "(" ^ iter_string_of_expr_list slist (indent + 2) ^ ")"
+    | Expr_dotted_list (slist, sexp) ->
+      "\n"
+      ^ spaces indent
+      ^ "("
+      ^ iter_string_of_expr_list slist (indent + 2)
+      ^ " . "
+      ^ string_of_expr sexp
+      ^ ")"
   and iter_string_of_expr_list slist indent =
     match slist with
     | [] -> ""

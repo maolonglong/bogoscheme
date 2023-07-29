@@ -10,6 +10,7 @@ type atom =
 type expr =
   | Expr_atom of atom
   | Expr_list of expr list
+  | Expr_dotted_list of expr list * expr
 
 (** Convert an S-expression to a string.
     This version makes the structure of the S-expression explicit. *)

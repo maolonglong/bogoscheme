@@ -25,6 +25,7 @@ let repl () =
       | e ->
         (match e with
          | Failure f -> Printf.printf "ERROR: %s\n" f
+         | Invalid_argument f -> Printf.printf "ERROR: %s\n" f
          | Eval.Type_error s -> Printf.printf "ERROR: type error: %s\n" s
          | Not_found -> Printf.printf "ERROR: name not found\n"
          | Sys.Break -> print_endline "Interrupted."

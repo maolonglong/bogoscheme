@@ -7,8 +7,11 @@ type value =
   | Val_bool of bool
   | Val_int of int
   | Val_string of string
+  | Val_id of id
+  | Val_list of value list
   | Val_prim of (env -> value list -> value) (* primitive functions *)
-  | Val_lambda of env * id list * Ast.expr list
+  | Val_lambda of env * id list * id option * Ast.expr list
+  | Val_macro of Ast.expr
 
 and env =
   { parent : env option
@@ -17,15 +20,23 @@ and env =
 
 (* Values. *)
 
-let string_of_value v =
-  match v with
+let rec string_of_value : value -> string =
+  let rec string_of_value_list : value list -> string = function
+    | [] -> ""
+    | [ x ] -> string_of_value x
+    | x :: xs -> string_of_value x ^ " " ^ string_of_value_list xs
+  in
+  function
   | Val_unit -> "#u"
   | Val_bool true -> "#t"
   | Val_bool false -> "#f"
   | Val_int i -> string_of_int i
   | Val_string s -> Printf.sprintf "%S" s
+  | Val_id id -> id
+  | Val_list l -> "(" ^ string_of_value_list l ^ ")"
   | Val_prim _ -> "[primitive function]"
   | Val_lambda _ -> "[lambda expression]"
+  | Val_macro _ -> "[macro expression]"
 ;;
 
 (* Environments. *)

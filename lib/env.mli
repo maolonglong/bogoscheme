@@ -7,8 +7,11 @@ type value =
   | Val_bool of bool
   | Val_int of int
   | Val_string of string
+  | Val_id of id
+  | Val_list of value list
   | Val_prim of (env -> value list -> value) (* primitive functions *)
-  | Val_lambda of env * id list * Ast.expr list
+  | Val_lambda of env * id list * id option * Ast.expr list
+  | Val_macro of Ast.expr
 
 (** Type of environments. *)
 and env =

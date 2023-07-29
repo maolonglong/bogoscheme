@@ -63,18 +63,93 @@ let print _ values =
   | _ -> invalid_arg err_msg
 ;;
 
-let and' _ = function
-  | [] -> Val_bool true
-  | [ x ] -> x
-  | [ Val_bool b; y ] -> if b then y else Val_bool false
-  | _ -> invalid_arg "and requires less than three arguments"
+let car _ = function
+  | [ Val_list (hd :: _) ] -> hd
+  | _ -> invalid_arg "car must be given a pair."
 ;;
 
-let or' _ = function
-  | [] -> Val_bool false
-  | [ x ] -> x
-  | [ (Val_bool b as x); y ] -> if b then x else y
-  | _ -> invalid_arg "or requires less than three arguments"
+let cdr _ = function
+  | [ Val_list (_ :: tl) ] -> Val_list tl
+  | _ -> invalid_arg "cdr must be given a pair."
+;;
+
+let cons _ = function
+  | [ x; Val_list xs ] -> Val_list (x :: xs)
+  | _ -> invalid_arg "cons must be given exactly two arguments."
+;;
+
+let is_eqv_aux v1 v2 =
+  match v1, v2 with
+  | Val_bool x, Val_bool y -> x = y
+  | Val_id x, Val_id y -> x = y
+  | Val_int x, Val_int y -> x = y
+  | Val_unit, Val_unit -> true
+  | _ -> false
+;;
+
+let is_eqv _ = function
+  | [ v1; v2 ] -> Val_bool (is_eqv_aux v1 v2)
+  | _ -> failwith "Equality comparators require exactly two arguments."
+;;
+
+let is_equal _ =
+  let rec is_equal_aux v1 v2 =
+    match v1, v2 with
+    | Val_string x, Val_string y -> x = y
+    | Val_list (t1 :: h1), Val_list (t2 :: h2) ->
+      t1 = t2 && is_equal_aux (Val_list h1) (Val_list h2)
+    | _ -> is_eqv_aux v1 v2
+  in
+  function
+  | [ v1; v2 ] -> Val_bool (is_equal_aux v1 v2)
+  | _ -> failwith "Equality comparators require exactly two arguments."
+;;
+
+let is_boolean _ = function
+  | [ Val_bool _ ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "boolean? requires exactly one argument."
+;;
+
+let is_number _ = function
+  | [ Val_int _ ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "number? requires exactly one argument."
+;;
+
+let is_string _ = function
+  | [ Val_string _ ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "string? requires exactly one argument."
+;;
+
+let is_symbol _ = function
+  | [ Val_id _ ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "symbol? requires exactly one argument."
+;;
+
+let is_list _ = function
+  | [ Val_list _ ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "list? requires exactly one argument."
+;;
+
+let is_pair _ = function
+  | [ Val_list (_ :: _) ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "pair? requires exactly one argument."
+;;
+
+let is_null _ = function
+  | [ Val_list [] ] -> Val_bool true
+  | [ _ ] -> Val_bool false
+  | _ -> failwith "null? requires exactly one argument."
+;;
+
+let error _ = function
+  | [ Val_string s ] -> failwith ("[ERROR] " ^ s)
+  | _ -> failwith "ERROR requires exactly one string argument."
 ;;
 
 let load_from_lexbuf env lexbuf =
@@ -124,8 +199,20 @@ let load env =
     ; ge, ">="
     ; print, "print"
     ; load_from_file, "load"
-    ; and', "and"
-    ; or', "or"
+    ; car, "car"
+    ; cdr, "cdr"
+    ; cons, "cons"
+    ; is_eqv, "eq?"
+    ; is_eqv, "eqv?"
+    ; is_equal, "equal?"
+    ; is_boolean, "boolean?"
+    ; is_number, "number?"
+    ; is_string, "string?"
+    ; is_symbol, "symbol?"
+    ; is_list, "list?"
+    ; is_pair, "pair?"
+    ; is_null, "null?"
+    ; error, "error"
     ]
   in
   List.iter (fun (op, name) -> Env.add env name (Val_prim op)) ops;

@@ -8,9 +8,12 @@ type expr =
   | Expr_int of int
   | Expr_string of string
   | Expr_id of id
+  | Expr_quoted of Sexpr.expr
   | Expr_define of id * expr
+  | Expr_define_macro of id * expr
   | Expr_if of expr * expr * expr
-  | Expr_lambda of id list * expr list
+  (* lambda: arg_ids * varg? * body *)
+  | Expr_lambda of id list * id option * expr list
   | Expr_apply of expr * expr list
 
 (** Convert an S-expression into an AST expression. *)
