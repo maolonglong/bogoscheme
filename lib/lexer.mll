@@ -15,7 +15,10 @@ rule lex = parse
   | '('              { TOK_LPAREN }
   | ')'              { TOK_RPAREN }
   | '.'              { TOK_DOT }
-  | "'"              { TOK_QUOTE }
+  | '\''             { TOK_QUOTE }
+  | '`'              { TOK_QUASIQUOTE }
+  | ','              { TOK_UNQUOTE }
+  | ",@"             { TOK_UNQUOTE_SPLICING }
   | "#u"             { TOK_UNIT }
   | "#t"             { TOK_BOOL true }
   | "#f"             { TOK_BOOL false }
@@ -28,7 +31,7 @@ rule lex = parse
 and lex_string buf = parse
   | '"'          { TOK_STRING (Buffer.contents buf) }
   | '\\' '\\'    { Buffer.add_char buf '\\'; lex_string buf lexbuf }
-  | '\\' '\n'    { Buffer.add_char buf '\n'; lex_string buf lexbuf }
+  | '\\' 'n'    { Buffer.add_char buf '\n'; lex_string buf lexbuf }
   | '\\' '"'     { Buffer.add_char buf '"'; lex_string buf lexbuf }
   | [^ '"' '\\'] { Buffer.add_string buf (Lexing.lexeme lexbuf); lex_string buf lexbuf }
   | eof          { failwith "String is not terminated" }

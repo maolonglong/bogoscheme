@@ -3,7 +3,7 @@
 all: fmt test examples
 
 fmt:
-	@dune fmt
+	@dune fmt || true
 .PHONY: fmt
 
 build:

@@ -3,6 +3,14 @@ open Bogoscheme
 let repl () =
   Sys.catch_break true;
   let env = Env.make None in
+  let is_macro id =
+    try
+      match Env.lookup env id with
+      | Env.Val_macro _ -> true
+      | _ -> false
+    with
+    | Failure _ -> false
+  in
   let rec loop () =
     print_string "> ";
     flush stdout;
@@ -14,7 +22,7 @@ let repl () =
         match Parser.parse Lexer.lex lexbuf with
         | None -> loop ()
         | Some sexpr ->
-          let ast = Ast.ast_of_sexpr sexpr in
+          let ast = Ast.ast_of_sexpr is_macro sexpr in
           (* eval *)
           let v = Eval.eval ast env in
           (* print *)
@@ -45,12 +53,20 @@ let repl () =
 let run_program infile =
   let lexbuf = Lexing.from_channel infile in
   let env = Env.make None in
+  let is_macro id =
+    try
+      match Env.lookup env id with
+      | Env.Val_macro _ -> true
+      | _ -> false
+    with
+    | Failure _ -> false
+  in
   let rec loop env =
     let sexpr = Parser.parse Lexer.lex lexbuf in
     match sexpr with
     | None -> ()
     | Some s ->
-      let expr = Ast.ast_of_sexpr s in
+      let expr = Ast.ast_of_sexpr is_macro s in
       let _ = Eval.eval expr env in
       loop env
   in
@@ -72,7 +88,8 @@ let () =
         | Failure f -> Printf.fprintf stderr "\nERROR: %s\n" f
         | Eval.Type_error s -> Printf.fprintf stderr "\nERROR: type error: %s\n" s
         | Not_found -> Printf.fprintf stderr "\nERROR: name not found\n"
-        | _ -> Printf.fprintf stderr "\nERROR: unspecified\n");
+        (* | _ -> Printf.fprintf stderr "\nERROR: unspecified\n"); *)
+        | exn -> Printf.fprintf stderr "\nERROR: %s\n" (Printexc.to_string exn));
        close_in infile;
        exit 1);
     close_in infile;

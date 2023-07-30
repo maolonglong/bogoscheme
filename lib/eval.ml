@@ -63,6 +63,14 @@ let rec sexpr_of_val_list =
 ;;
 
 let rec eval ast env =
+  let is_macro id =
+    try
+      match Env.lookup env id with
+      | Env.Val_macro _ -> true
+      | _ -> false
+    with
+    | Failure _ -> false
+  in
   match ast with
   | Ast.Expr_unit -> Val_unit
   | Ast.Expr_bool b -> Val_bool b
@@ -79,9 +87,8 @@ let rec eval ast env =
     Val_unit
   | Ast.Expr_if (test_e, then_e, else_e) ->
     (match eval test_e env with
-     | Val_bool true -> eval then_e env
      | Val_bool false -> eval else_e env
-     | _ -> raise (Type_error "Cannot evaluate non-boolean in if statement"))
+     | _ -> eval then_e env)
   | Ast.Expr_lambda (ids, varg, exprs) -> Val_lambda (env, ids, varg, exprs)
   | Ast.Expr_apply (e, es) ->
     (* Evaluate all the operands (all arguments except the first. *)
@@ -98,7 +105,7 @@ let rec eval ast env =
        let sexpr = sexpr_of_val_list lst in
        (match sexpr with
         | Sexpr.Expr_atom _ as atom -> val_of_sexpr atom
-        | Sexpr.Expr_list _ -> eval (Ast.ast_of_sexpr sexpr) env
+        | Sexpr.Expr_list _ -> eval (Ast.ast_of_sexpr is_macro sexpr) env
         | Sexpr.Expr_dotted_list _ -> failwith "Invalid macro")
      | Val_lambda (env', ids, varg, exprs) ->
        let len_ids = List.length ids in
@@ -107,7 +114,7 @@ let rec eval ast env =
         | None ->
           if len_ops <> len_ids then raise (Type_error "Applied to wrong operands")
         | Some _ ->
-          if len_ops < len_ids + 1 then raise (Type_error "Applied to wrong operands"));
+          if len_ops < len_ids + 1 then raise (Type_error "Applied to wrong operands 2"));
        let parent_env = make (Some env') in
        (match varg with
         | None -> add_all parent_env ids (operands ())

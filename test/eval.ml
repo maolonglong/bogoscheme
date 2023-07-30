@@ -4,12 +4,20 @@ open Bogoscheme
 let interp input =
   let lexbuf = Lexing.from_string input in
   let env = Env.make None in
+  let is_macro id =
+    try
+      match Env.lookup env id with
+      | Env.Val_macro _ -> true
+      | _ -> false
+    with
+    | Failure _ -> false
+  in
   let rec loop env ret =
     let sexpr = Parser.parse Lexer.lex lexbuf in
     match sexpr with
     | None -> ret
     | Some s ->
-      let expr = Ast.ast_of_sexpr s in
+      let expr = Ast.ast_of_sexpr is_macro s in
       let v = Eval.eval expr env in
       loop env (Some v)
   in

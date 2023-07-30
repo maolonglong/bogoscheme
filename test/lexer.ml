@@ -9,6 +9,9 @@ let string_of_token = function
   | TOK_UNIT -> "UNIT"
   | TOK_DOT -> "DOT"
   | TOK_QUOTE -> "quote"
+  | TOK_QUASIQUOTE -> "quasiquote"
+  | TOK_UNQUOTE -> "unquote"
+  | TOK_UNQUOTE_SPLICING -> "unquote-splicing"
   | TOK_BOOL b -> if b then "#t" else "#f"
   | TOK_INT i -> string_of_int i
   | TOK_STRING s -> Printf.sprintf "%S" s

@@ -14,12 +14,8 @@ type expr =
   | Expr_lambda of id list * id option * expr list
   | Expr_apply of expr * expr list
 
-module StringSet = Set.Make (String)
-
-(* FIXME *)
-let macros = ref StringSet.empty
-
-let rec ast_of_sexpr sx =
+(* FIXME: env ... *)
+let rec ast_of_sexpr is_macro sx =
   let module S = Sexpr in
   let ast_of_atom = function
     | S.Atom_unit -> Expr_unit
@@ -36,50 +32,50 @@ let rec ast_of_sexpr sx =
     match l with
     (* (lambda (x) body) *)
     | S.Expr_list operands :: sexprs ->
-      Expr_lambda (List.map id_of_sexpr operands, None, List.map ast_of_sexpr sexprs)
+      Expr_lambda
+        (List.map id_of_sexpr operands, None, List.map (ast_of_sexpr is_macro) sexprs)
     (* (lambda (x . y) body) *)
     | S.Expr_dotted_list (l, last) :: sexprs ->
       Expr_lambda
-        (List.map id_of_sexpr l, Some (id_of_sexpr last), List.map ast_of_sexpr sexprs)
+        ( List.map id_of_sexpr l
+        , Some (id_of_sexpr last)
+        , List.map (ast_of_sexpr is_macro) sexprs )
     | _ -> failwith "Invalid lambda"
   in
   let ast_of_define = function
     (* (define x y) *)
-    | [ S.Expr_atom (S.Atom_id id); tl ] ->
-      macros := StringSet.remove id !macros;
-      Expr_define (id, ast_of_sexpr tl)
+    | [ S.Expr_atom (S.Atom_id id); tl ] -> Expr_define (id, ast_of_sexpr is_macro tl)
     (* (define (f x) body) *)
-    | [ S.Expr_list (S.Expr_atom (S.Atom_id id) :: operands); body ] ->
-      macros := StringSet.remove id !macros;
-      Expr_define (id, ast_of_lambda (S.Expr_list operands :: [ body ]))
+    | S.Expr_list (S.Expr_atom (S.Atom_id id) :: operands) :: body ->
+      Expr_define (id, ast_of_lambda (S.Expr_list operands :: body))
     (* (define (f x . y) body) *)
-    | [ S.Expr_dotted_list (S.Expr_atom (S.Atom_id id) :: arg_ids, operands); body ] ->
-      macros := StringSet.remove id !macros;
-      Expr_define (id, ast_of_lambda (S.Expr_dotted_list (arg_ids, operands) :: [ body ]))
+    | S.Expr_dotted_list (S.Expr_atom (S.Atom_id id) :: arg_ids, operands) :: body ->
+      Expr_define (id, ast_of_lambda (S.Expr_dotted_list (arg_ids, operands) :: body))
     | _ -> failwith "Invalid define"
   in
   let ast_of_macro = function
     | [ S.Expr_atom (S.Atom_id name); tl ] ->
-      let body = ast_of_sexpr tl in
+      let body = ast_of_sexpr is_macro tl in
       (match body with
-       | Expr_lambda ([ _ ], None, _) as lambda ->
-         macros := StringSet.add name !macros;
-         Expr_define_macro (name, lambda)
+       | Expr_lambda ([ _ ], None, _) as lambda -> Expr_define_macro (name, lambda)
        | _ -> failwith "Invalid define-macro")
     | _ -> failwith "Invalid define-macro"
   in
   let ast_of_if = function
     | [ test_clause; then_clause; else_clause ] ->
       Expr_if
-        (ast_of_sexpr test_clause, ast_of_sexpr then_clause, ast_of_sexpr else_clause)
+        ( ast_of_sexpr is_macro test_clause
+        , ast_of_sexpr is_macro then_clause
+        , ast_of_sexpr is_macro else_clause )
     | _ -> failwith "Invalid if"
   in
   let ast_of_apply = function
     | func :: operands as l ->
-      (match ast_of_sexpr func with
-       | Expr_id id as macro_name when StringSet.mem id !macros ->
+      (match ast_of_sexpr is_macro func with
+       | Expr_id id as macro_name when is_macro id ->
          Expr_apply (macro_name, [ Expr_quoted (S.Expr_list l) ])
-       | _ -> Expr_apply (ast_of_sexpr func, List.map ast_of_sexpr operands))
+       | _ ->
+         Expr_apply (ast_of_sexpr is_macro func, List.map (ast_of_sexpr is_macro) operands))
     | _ -> failwith "Invalid apply"
   in
   let ast_of_quote = function
@@ -101,7 +97,8 @@ let rec ast_of_sexpr sx =
            | S.Atom_id "lambda" -> ast_of_lambda tl
            | S.Atom_id "quote" -> ast_of_quote tl
            | _ -> ast_of_apply (S.Expr_atom atom :: tl))
-        | S.Expr_list _ -> Expr_apply (ast_of_sexpr hd, List.map ast_of_sexpr tl)
+        | S.Expr_list _ ->
+          Expr_apply (ast_of_sexpr is_macro hd, List.map (ast_of_sexpr is_macro) tl)
         | S.Expr_dotted_list _ -> failwith "Invalid expression"))
   | S.Expr_dotted_list _ -> failwith "TODO"
 ;;

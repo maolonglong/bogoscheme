@@ -1,6 +1,9 @@
 %token TOK_LPAREN TOK_RPAREN
 
 %token          TOK_QUOTE
+%token          TOK_QUASIQUOTE
+%token          TOK_UNQUOTE
+%token          TOK_UNQUOTE_SPLICING
 %token          TOK_DOT
 %token          TOK_UNIT
 %token <bool>   TOK_BOOL
@@ -24,10 +27,13 @@ parse:
   ;
 
 sexpr:
-  | a = atom        { Sexpr.Expr_atom a }
-  | e = quoted      { Sexpr.Expr_list [ Sexpr.Expr_atom (Sexpr.Atom_id "quote"); e ] }
-  | l = slist       { Sexpr.Expr_list l }
-  | l = dotted_list { l }
+  | a = atom                        { Sexpr.Expr_atom a }
+  | e = quoted                      { Sexpr.Expr_list [ Sexpr.Expr_atom (Sexpr.Atom_id "quote"); e ] }
+  | TOK_QUASIQUOTE; e = sexpr      { Sexpr.Expr_list [ Sexpr.Expr_atom (Sexpr.Atom_id "quasiquote"); e ] }
+  | TOK_UNQUOTE; e = sexpr          { Sexpr.Expr_list [ Sexpr.Expr_atom (Sexpr.Atom_id "unquote"); e ] }
+  | TOK_UNQUOTE_SPLICING; e = sexpr { Sexpr.Expr_list [ Sexpr.Expr_atom (Sexpr.Atom_id "unquote-splicing"); e ] }
+  | l = slist                       { Sexpr.Expr_list l }
+  | l = dotted_list                 { l }
   ;
 
 atom:

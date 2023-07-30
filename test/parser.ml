@@ -6,7 +6,7 @@ let ( >>= ) = Fun.flip Option.map
 let ast_of_string input =
   let lexbuf = Lexing.from_string input in
   let sexpr = Parser.parse Lexer.lex lexbuf in
-  sexpr >>= fun e -> Ast.ast_of_sexpr e
+  sexpr >>= fun e -> Ast.ast_of_sexpr (fun _ -> false) e
 ;;
 
 let make_parser_test name expected_output input =

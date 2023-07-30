@@ -17,7 +17,7 @@ type expr =
   | Expr_apply of expr * expr list
 
 (** Convert an S-expression into an AST expression. *)
-val ast_of_sexpr : Sexpr.expr -> expr
+val ast_of_sexpr : (id -> bool) -> Sexpr.expr -> expr
 
 (** Convert an AST expression into a string. *)
 val string_of_ast : expr -> string

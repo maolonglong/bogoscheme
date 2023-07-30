@@ -63,6 +63,20 @@ let print _ values =
   | _ -> invalid_arg err_msg
 ;;
 
+let display _ values =
+  let err_msg = "display requires exactly one argument" in
+  match values with
+  | [ Val_string s ] ->
+    let unescaped = Scanf.unescaped s in
+    print_string unescaped;
+    Val_unit
+  | [ value ] ->
+    Printf.printf "%s" (string_of_value value);
+    flush stdout;
+    Val_unit
+  | _ -> invalid_arg err_msg
+;;
+
 let car _ = function
   | [ Val_list (hd :: _) ] -> hd
   | _ -> invalid_arg "car must be given a pair."
@@ -73,8 +87,10 @@ let cdr _ = function
   | _ -> invalid_arg "cdr must be given a pair."
 ;;
 
+(* FIXME: distinguish between ordinary list and dotted_list *)
 let cons _ = function
   | [ x; Val_list xs ] -> Val_list (x :: xs)
+  | [ x; y ] -> Val_list (x :: [ y ])
   | _ -> invalid_arg "cons must be given exactly two arguments."
 ;;
 
@@ -96,8 +112,9 @@ let is_equal _ =
   let rec is_equal_aux v1 v2 =
     match v1, v2 with
     | Val_string x, Val_string y -> x = y
+    | Val_list [], Val_list [] -> true
     | Val_list (t1 :: h1), Val_list (t2 :: h2) ->
-      t1 = t2 && is_equal_aux (Val_list h1) (Val_list h2)
+      is_equal_aux t1 t2 && is_equal_aux (Val_list h1) (Val_list h2)
     | _ -> is_eqv_aux v1 v2
   in
   function
@@ -153,11 +170,19 @@ let error _ = function
 ;;
 
 let load_from_lexbuf env lexbuf =
+  let is_macro id =
+    try
+      match Env.lookup env id with
+      | Env.Val_macro _ -> true
+      | _ -> false
+    with
+    | Failure _ -> false
+  in
   let rec loop () =
     match Parser.parse Lexer.lex lexbuf with
     | None -> ()
     | Some sexpr ->
-      let ast = Ast.ast_of_sexpr sexpr in
+      let ast = Ast.ast_of_sexpr is_macro sexpr in
       ignore @@ Eval.eval ast env;
       loop ()
   in
@@ -198,6 +223,7 @@ let load env =
     ; le, "<="
     ; ge, ">="
     ; print, "print"
+    ; display, "display"
     ; load_from_file, "load"
     ; car, "car"
     ; cdr, "cdr"
