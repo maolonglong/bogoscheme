@@ -142,65 +142,6 @@
           (else
             (error "Invalid quasiquote: more than one argument given.")))))
 
-;;; Quasiquote, unquote, and unquote-splicing.
-;;; Implementation based on "Quasiquotation in Lisp" by Alan Bawden (1999).
-(define-macro quasiquote
-  (lambda (exp)
-    (define (qq-expand x depth)
-      (cond ((pair? x)
-             (cond ((eq? (car x) 'quasiquote)
-                    (list 'cons
-                          (list 'quote 'quasiquote)
-                          (qq-expand (cdr x) (+ depth 1))))
-                   ((or (eq? (car x) 'unquote)
-                        (eq? (car x) 'unquote-splicing))
-                    (cond ((> depth 0)
-                           (list 'cons
-                                 (list 'quote (car x))
-                                 (qq-expand (cdr x) (- depth 1))))
-                          ((and (eq? (car x) 'unquote)
-                                (and (not (null? (cdr x))))
-                                (null? (cddr x)))
-                           (cadr x))
-                          (else
-                            (error "Invalid quasiquote."))))
-                   (else
-                     (list 'append
-                           (qq-expand-list (car x) depth)
-                           (qq-expand (cdr x) depth)))))
-            (else
-              (list 'quote x))))
-
-    (define (qq-expand-list x depth)
-      (cond ((pair? x)
-             (cond ((eq? (car x) 'quasiquote)
-                    (list 'list (list 'cons
-                                      (list 'quote 'quasiquote)
-                                      (qq-expand (cdr x) (+ depth 1)))))
-                   ((or (eq? (car x) 'unquote)
-                        (eq? (car x) 'unquote-splicing))
-                    (cond ((> depth 0)
-                           (list 'list (list 'cons
-                                             (list 'quote (car x))
-                                             (qq-expand (cdr x) (- depth 1)))))
-                          ((eq? (car x) 'unquote)
-                           (cons 'list (cdr x)))
-                          (else
-                            (cons 'append (cdr x)))))
-                   (else
-                     (list 'list (list 'append
-                                       (qq-expand-list (car x) depth)
-                                       (qq-expand (cdr x) depth))))))
-            (else
-              (list 'quote (list x)))))
-
-    (cond ((null? (cdr exp))
-           (error "Invalid quasiquote: missing argument."))
-          ((null? (cddr exp))
-           (qq-expand (cadr exp) 0))
-          (else
-            (error "Invalid quasiquote: more than one argument given.")))))
-
 ;;; Boolean.
 ;; (and) -> #t
 ;; (and x) -> x
